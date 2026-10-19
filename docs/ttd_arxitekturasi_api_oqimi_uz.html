@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TTD Arxitekturasi va API chaqiriqlari</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #1f2937;
+      line-height: 1.6;
+      margin: 48px;
+      font-size: 14px;
+    }
+    h1, h2, h3 {
+      color: #111827;
+      margin-bottom: 8px;
+    }
+    h1 {
+      font-size: 28px;
+      margin-top: 0;
+    }
+    h2 {
+      font-size: 20px;
+      margin-top: 28px;
+      border-bottom: 1px solid #e5e7eb;
+      padding-bottom: 6px;
+    }
+    h3 {
+      font-size: 16px;
+      margin-top: 20px;
+    }
+    p, li {
+      margin: 6px 0;
+    }
+    code, pre {
+      font-family: "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+    }
+    pre {
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 12px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .note {
+      background: #eff6ff;
+      border-left: 4px solid #2563eb;
+      padding: 12px 14px;
+      border-radius: 6px;
+    }
+    .warn {
+      background: #fff7ed;
+      border-left: 4px solid #ea580c;
+      padding: 12px 14px;
+      border-radius: 6px;
+    }
+    .flow {
+      background: #f9fafb;
+      border: 1px dashed #9ca3af;
+      border-radius: 8px;
+      padding: 14px;
+      font-weight: 600;
+    }
+    ul {
+      padding-left: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>TTD arxitekturasi qanday ishlaydi: ayniqsa API chaqiriqlari</h1>
+
+  <p>
+    Ushbu hujjat loyiha ichidagi amaldagi qatlamli tuzilma asosida yozildi. Reponing o'zida
+    <strong>TTD</strong> degan alohida modul yoki papka topilmadi, lekin kod oqimi amalda
+    <strong>Presentation -> Domain -> Data</strong> ko'rinishida ishlayotgani sababli hujjat shu
+    arxitektura asosida tushuntirildi.
+  </p>
+
+  <div class="note">
+    Hozirgi kod bazada to'liq ishlayotgan API oqimi asosan <strong>getTasks()</strong> orqali
+    tashkil qilingan. Ya'ni hozir asosiy misol sifatida <strong>GET /api/tasks</strong> ishlatiladi.
+  </div>
+
+  <h2>1. Qisqa mazmun</h2>
+  <p>Bu arxitekturada har bir qatlamning vazifasi aniq bo'linadi:</p>
+  <ul>
+    <li><strong>Presentation</strong> foydalanuvchi interfeysi va holatni boshqaradi.</li>
+    <li><strong>Domain</strong> biznes mantiq va kontraktlarni belgilaydi.</li>
+    <li><strong>Data</strong> API, server va tashqi manbalar bilan gaplashadi.</li>
+  </ul>
+
+  <div class="flow">
+    UI (TasksPage) -> Cubit (TasksCubit) -> UseCase (GetTaskUsecase) ->
+    Repository (TaskRepository) -> DataSource (TaskRemoteDataSourceImpl) ->
+    Dio -> API -> javob qaytadi -> UI state yangilanadi
+  </div>
+
+  <h2>2. Papkalar bo'yicha tuzilma</h2>
+  <ul>
+    <li><strong>lib/features/tasks/presentation/</strong>: sahifa, widget va Cubit.</li>
+    <li><strong>lib/features/tasks/domain/</strong>: repository kontrakti va usecase.</li>
+    <li><strong>lib/features/tasks/data/</strong>: datasource va repository implementatsiyasi.</li>
+    <li><strong>lib/core/</strong>: umumiy xatoliklar, Either tipi, usecase bazasi va routing.</li>
+  </ul>
+
+  <h2>3. API chaqirig'i amalda qanday yuradi</h2>
+
+  <h3>3.1. Oqim qayerdan boshlanadi</h3>
+  <p>
+    <strong>TasksPage</strong> ochilganda u yerning o'zida kerakli objectlar zanjiri quriladi:
+    <code>TaskRemoteDataSourceImpl -> TaskRepositoryImple -> GetTaskUsecase -> TasksCubit</code>.
+    So'ng darhol <code>..getTask()</code> chaqiriladi.
+  </p>
+  <pre>
+TasksCubit(
+  usecase: GetTaskUsecase(
+    taskRepository: TaskRepositoryImple(
+      dataSource: TaskRemoteDataSourceImpl(),
+    ),
+  ),
+)..getTask()
+  </pre>
+  <p>
+    Bu yondashuvning ma'nosi shuki, UI API bilan to'g'ridan-to'g'ri gaplashmaydi. UI faqat Cubit
+    bilan ishlaydi, qolgan qatlamlar pastga qarab uzatiladi.
+  </p>
+
+  <h3>3.2. Cubit state boshqaradi</h3>
+  <p>
+    <strong>TasksCubit</strong> ichida <code>getTask()</code> ishlaganda avval state
+    <code>loading</code> bo'ladi, keyin usecase chaqiriladi. Natija muvaffaqiyatli bo'lsa
+    <code>success</code>, xato bo'lsa <code>error</code> holatiga o'tadi.
+  </p>
+  <pre>
+emit(state.copyWith(status: TaskStatus.loading));
+final result = await usecase.call(NoParams());
+
+if (result.isRight) {
+  emit(state.copyWith(status: TaskStatus.success, data: result.right));
+} else {
+  emit(state.copyWith(
+    status: TaskStatus.error,
+    errorText: result.left.message,
+  ));
+}
+  </pre>
+  <p>
+    Hozirgi kodda foydalanuvchi loading holatini ko'rishi uchun sun'iy ravishda
+    <code>Future.delayed(Duration(seconds: 3))</code> ham qo'shilgan.
+  </p>
+
+  <h3>3.3. UseCase biznes kirish nuqtasi bo'ladi</h3>
+  <p>
+    <strong>GetTaskUsecase</strong> domain qatlamida turadi va presentation qatlamini repository
+    kontrakti bilan bog'laydi. U API qanday ishlashini bilmaydi, faqat
+    <code>taskRepository.getTasks()</code> ni chaqiradi.
+  </p>
+
+  <h3>3.4. Repository abstraksiya beradi</h3>
+  <p>
+    <strong>TaskRepository</strong> domain kontrakt hisoblanadi. Bu qatlamning foydasi shundaki,
+    Cubit yoki usecase API'ga bog'lanib qolmaydi. Ertaga API o'rniga local cache ishlatilsa ham,
+    interfeys bir xil qoladi.
+  </p>
+  <pre>
+abstract class TaskRepository {
+  Future&lt;Either&lt;Failure, List&gt;&gt; getTasks();
+}
+  </pre>
+
+  <h3>3.5. Repository implementation real manbaga ulanadi</h3>
+  <p>
+    <strong>TaskRepositoryImple</strong> data qatlamida joylashgan. U datasourcedan natijani olib,
+    yuqori qatlamga qaytaradi. Hozircha bu qatlam juda yupqa, lekin aynan shu joyda kerak bo'lsa:
+  </p>
+  <ul>
+    <li>mapping qilish,</li>
+    <li>cache va remote orasida tanlash,</li>
+    <li>bir nechta manbani birlashtirish,</li>
+    <li>response ni domain modelga o'tkazish</li>
+  </ul>
+  <p>bajarilishi mumkin.</p>
+
+  <h3>3.6. DataSource API bilan bevosita gaplashadi</h3>
+  <p>
+    API ga haqiqiy so'rov aynan <strong>TaskRemoteDataSourceImpl</strong> ichida yuboriladi:
+  </p>
+  <pre>
+final response = await Dio().get("http://localhost:1337/api/tasks");
+  </pre>
+  <p>Bu yerda oqim quyidagicha:</p>
+  <ul>
+    <li><strong>Dio</strong> HTTP so'rov yuboradi.</li>
+    <li>Agar status kodi 200-299 oralig'ida bo'lsa, <code>response.data['data']</code> olinadi.</li>
+    <li>Muvaffaqiyat bo'lsa <code>Right(...)</code> qaytariladi.</li>
+    <li>Xato bo'lsa <code>Left(Failure)</code> qaytariladi.</li>
+  </ul>
+
+  <h2>4. Nega Either ishlatilgan</h2>
+  <p>
+    Loyihada natija <strong>Either&lt;Failure, Data&gt;</strong> orqali qaytariladi:
+  </p>
+  <ul>
+    <li><strong>Right</strong> = muvaffaqiyatli natija</li>
+    <li><strong>Left</strong> = xatolik</li>
+  </ul>
+  <p>
+    Bu usulning foydasi shuki, metod doimo bitta tipdagi natija qaytaradi va yuqori qatlamlar
+    <code>try/catch</code> bilan to'lib ketmaydi.
+  </p>
+
+  <pre>
+if (result.isRight) {
+  // success data
+} else {
+  // failure message
+}
+  </pre>
+
+  <h2>5. Xatoliklar qanday ushlanadi</h2>
+  <p><strong>TaskRemoteDataSourceImpl</strong> ichida uch xil asosiy holat bor:</p>
+  <ul>
+    <li><strong>DioException</strong>: server yoki request muammosi.</li>
+    <li><strong>SocketException</strong>: internet yo'q yoki tarmoq uzilgan.</li>
+    <li><strong>catch</strong>: kutilmagan umumiy xatolik.</li>
+  </ul>
+
+  <pre>
+} on DioException catch (error) {
+  return Left(DioFailure(message: error.message));
+} on SocketException catch (_) {
+  return Left(NetworkFailure(message: "Internet o'chiq"));
+} catch (error) {
+  return Left(Failure(message: 'Something went wrong'));
+}
+  </pre>
+
+  <p>
+    Keyin bu xatolik Cubit ga chiqadi va u <code>errorText</code> orqali UI ga uzatiladi.
+  </p>
+
+  <h2>6. Hozirgi loyihadagi API oqimining kuchli tomonlari</h2>
+  <ul>
+    <li>UI qatlam API detallarini bilmaydi.</li>
+    <li>Biznes qoidalar usecase orqali ajratilgan.</li>
+    <li>Xatoliklar yagona formatda qaytadi.</li>
+    <li>Test yozish osonlashadi, chunki repository kontrakti bor.</li>
+  </ul>
+
+  <h2>7. Muhim kuzatuvlar</h2>
+  <div class="warn">
+    Hozir dependency injection alohida container yoki service locator orqali emas, to'g'ridan-to'g'ri
+    <strong>TasksPage</strong> ichida qurilgan. Kichik loyiha uchun bu ishlaydi, lekin loyiha
+    kattalashsa <strong>get_it</strong>, <strong>injectable</strong> yoki alohida composition root
+    kerak bo'lishi mumkin.
+  </div>
+  <ul>
+    <li>Datasource hozir <strong>List</strong> qaytaryapti, ya'ni tiplar hali kuchli emas.</li>
+    <li><strong>task_model.dart</strong> amaliy oqimda hali ishlatilmayapti.</li>
+    <li>Repository qatlamida mapping deyarli yo'q, natija xom holda yuqoriga chiqyapti.</li>
+    <li>API URL hardcoded: <code>http://localhost:1337/api/tasks</code>.</li>
+  </ul>
+
+  <h2>8. Yangi API qo'shmoqchi bo'lsak tartib qanday bo'ladi</h2>
+  <p>Masalan, yangi <strong>POST /api/tasks</strong> qo'shish uchun odatda quyidagi tartib bo'ladi:</p>
+  <ol>
+    <li>Datasource ichida <code>addTask(...)</code> yoziladi va Dio orqali POST yuboriladi.</li>
+    <li>Repository kontraktiga <code>addTask</code> metodi qo'shiladi.</li>
+    <li>Repository implementation datasourcedagi yangi metodni chaqiradi.</li>
+    <li>Domain qatlamida <code>AddTaskUsecase</code> yoziladi.</li>
+    <li>Cubit ichida yangi action ochiladi.</li>
+    <li>UI shu actionni chaqiradi.</li>
+  </ol>
+
+  <pre>
+UI -> Cubit.addTask() -> AddTaskUsecase -> TaskRepository.addTask() ->
+TaskRemoteDataSource.addTask() -> Dio().post(...) -> API
+  </pre>
+
+  <h2>9. Qisqa misol: GET so'rov boshidan oxirigacha</h2>
+  <ol>
+    <li>Foydalanuvchi <strong>TasksPage</strong> ga kiradi.</li>
+    <li><strong>BlocProvider</strong> ichida <strong>TasksCubit</strong> yaratiladi.</li>
+    <li><code>..getTask()</code> ishga tushadi.</li>
+    <li>Cubit state ni <code>loading</code> ga o'tkazadi.</li>
+    <li>Cubit <strong>GetTaskUsecase</strong> ni chaqiradi.</li>
+    <li>Usecase <strong>TaskRepository</strong> ga murojaat qiladi.</li>
+    <li>Repository <strong>TaskRemoteDataSourceImpl</strong> ni chaqiradi.</li>
+    <li>Datasource <strong>Dio</strong> orqali <code>GET /api/tasks</code> yuboradi.</li>
+    <li>Serverdan javob keladi.</li>
+    <li>Natija <code>Right(data)</code> yoki <code>Left(failure)</code> ko'rinishida qaytadi.</li>
+    <li>Cubit yangi state beradi.</li>
+    <li>UI state ga qarab ro'yxat yoki xatolikni ko'rsatadi.</li>
+  </ol>
+
+  <h2>10. Koddagi tayanch nuqtalar</h2>
+  <ul>
+    <li><strong>TasksPage</strong>: dependency zanjiri va birinchi chaqiriq.</li>
+    <li><strong>TasksCubit</strong>: state boshqaruvi.</li>
+    <li><strong>GetTaskUsecase</strong>: biznes kirish nuqtasi.</li>
+    <li><strong>TaskRepository</strong>: kontrakt.</li>
+    <li><strong>TaskRepositoryImple</strong>: repository implementatsiyasi.</li>
+    <li><strong>TaskRemoteDataSourceImpl</strong>: real HTTP so'rov joyi.</li>
+    <li><strong>Either</strong> va <strong>Failure</strong>: success/error formatlari.</li>
+  </ul>
+
+  <h2>11. Xulosa</h2>
+  <p>
+    Bu loyihadagi TTD arxitektura yondashuvi API chaqiriqlarini qatlamlarga ajratib boshqaradi.
+    Natijada UI soddalashadi, biznes mantiq ajraladi va data manbasini almashtirish osonlashadi.
+    Hozirgi implementatsiya sodda va tushunarli, ayniqsa birinchi clean architecture tajribasi uchun
+    yaxshi asos bo'la oladi. Keyingi bosqichda typed model, dependency injection va request
+    konfiguratsiyasini markazlashtirish qo'shilsa arxitektura ancha mustahkam bo'ladi.
+  </p>
+
+  <h2>12. Manba fayllar</h2>
+  <ul>
+    <li>lib/features/tasks/presentation/pages/tasks_page.dart (17-21: dependency zanjiri va getTask start)</li>
+    <li>lib/features/tasks/presentation/cubit/tasks_cubit.dart (15-24: state va usecase oqimi)</li>
+    <li>lib/features/tasks/domain/usecases/get_task_usecase.dart (8-15: usecase delegatsiyasi)</li>
+    <li>lib/features/tasks/domain/repositories/task_repository.dart (4-5: repository kontrakti)</li>
+    <li>lib/features/tasks/data/repositories/task_repository_impl.dart (12-18: repository implementatsiyasi)</li>
+    <li>lib/features/tasks/data/datasources/task_remote_data_source.dart (14-33: Dio so'rovi va error handling)</li>
+    <li>lib/core/error/failures.dart (3-21: failure turlari)</li>
+    <li>lib/core/utils/either.dart (9-60: Left/Right natija modeli)</li>
+  </ul>
+</body>
+</html>

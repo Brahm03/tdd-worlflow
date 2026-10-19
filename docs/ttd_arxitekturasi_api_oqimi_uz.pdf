@@ -1,0 +1,574 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Count 5 /Kids [ 3 0 R 5 0 R 7 0 R 9 0 R 11 0 R ] >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 13 0 R >> >> /Contents 4 0 R >>
+endobj
+4 0 obj
+<< /Length 3015 >>
+stream
+BT
+/F1 11 Tf
+14 TL
+50 795 Td
+(     TTD Arxitekturasi va API chaqiriqlari  body { font-family: -apple-system,) Tj
+T*
+(BlinkMacSystemFont, "Segoe UI", sans-serif; color: #1f2937; line-height: 1.6; margin:) Tj
+T*
+(48px; font-size: 14px; } h1, h2, h3 { color: #111827; margin-bottom: 8px; } h1 {) Tj
+T*
+(font-size: 28px; margin-top: 0; } h2 { font-size: 20px; margin-top: 28px; border-bottom:) Tj
+T*
+(1px solid #e5e7eb; padding-bottom: 6px; } h3 { font-size: 16px; margin-top: 20px; } p,) Tj
+T*
+(li { margin: 6px 0; } code, pre { font-family: "SFMono-Regular", Menlo, Monaco,) Tj
+T*
+(Consolas, monospace; } pre { background: #f3f4f6; border: 1px solid #e5e7eb;) Tj
+T*
+(border-radius: 8px; padding: 12px; white-space: pre-wrap; word-break: break-word; }) Tj
+T*
+(.note { background: #eff6ff; border-left: 4px solid #2563eb; padding: 12px 14px;) Tj
+T*
+(border-radius: 6px; } .warn { background: #fff7ed; border-left: 4px solid #ea580c;) Tj
+T*
+(padding: 12px 14px; border-radius: 6px; } .flow { background: #f9fafb; border: 1px) Tj
+T*
+(dashed #9ca3af; border-radius: 8px; padding: 14px; font-weight: 600; } ul {) Tj
+T*
+(padding-left: 20px; }) Tj
+T*
+() Tj
+T*
+(TTD arxitekturasi qanday ishlaydi: ayniqsa API chaqiriqlari) Tj
+T*
+() Tj
+T*
+( Ushbu hujjat loyiha ichidagi amaldagi qatlamli tuzilma asosida yozildi. Reponing o'zida) Tj
+T*
+(TTD degan alohida modul yoki papka topilmadi, lekin kod oqimi amalda Presentation ->) Tj
+T*
+(Domain -> Data ko'rinishida ishlayotgani sababli hujjat shu arxitektura asosida) Tj
+T*
+(tushuntirildi.) Tj
+T*
+() Tj
+T*
+( Hozirgi kod bazada to'liq ishlayotgan API oqimi asosan getTasks\(\) orqali tashkil) Tj
+T*
+(qilingan. Ya'ni hozir asosiy misol sifatida GET /api/tasks ishlatiladi.) Tj
+T*
+() Tj
+T*
+(1. Qisqa mazmun) Tj
+T*
+() Tj
+T*
+(Bu arxitekturada har bir qatlamning vazifasi aniq bo'linadi:) Tj
+T*
+() Tj
+T*
+(- Presentation foydalanuvchi interfeysi va holatni boshqaradi.) Tj
+T*
+(- Domain biznes mantiq va kontraktlarni belgilaydi.) Tj
+T*
+(- Data API, server va tashqi manbalar bilan gaplashadi.) Tj
+T*
+() Tj
+T*
+( UI \(TasksPage\) -> Cubit \(TasksCubit\) -> UseCase \(GetTaskUsecase\) -> Repository) Tj
+T*
+(\(TaskRepository\) -> DataSource \(TaskRemoteDataSourceImpl\) -> Dio -> API -> javob qaytadi) Tj
+T*
+(-> UI state yangilanadi) Tj
+T*
+() Tj
+T*
+(2. Papkalar bo'yicha tuzilma) Tj
+T*
+() Tj
+T*
+(- lib/features/tasks/presentation/: sahifa, widget va Cubit.) Tj
+T*
+(- lib/features/tasks/domain/: repository kontrakti va usecase.) Tj
+T*
+(- lib/features/tasks/data/: datasource va repository implementatsiyasi.) Tj
+T*
+(- lib/core/: umumiy xatoliklar, Either tipi, usecase bazasi va routing.) Tj
+T*
+() Tj
+T*
+(3. API chaqirig'i amalda qanday yuradi) Tj
+T*
+() Tj
+T*
+(3.1. Oqim qayerdan boshlanadi) Tj
+T*
+() Tj
+T*
+( TasksPage ochilganda u yerning o'zida kerakli objectlar zanjiri quriladi:) Tj
+T*
+(TaskRemoteDataSourceImpl -> TaskRepositoryImple -> GetTaskUsecase -> TasksCubit. So'ng) Tj
+T*
+(darhol ..getTask\(\) chaqiriladi.) Tj
+T*
+() Tj
+T*
+(TasksCubit\() Tj
+T*
+(  usecase: GetTaskUsecase\() Tj
+T*
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 13 0 R >> >> /Contents 6 0 R >>
+endobj
+6 0 obj
+<< /Length 2242 >>
+stream
+BT
+/F1 11 Tf
+14 TL
+50 795 Td
+(    taskRepository: TaskRepositoryImple\() Tj
+T*
+(      dataSource: TaskRemoteDataSourceImpl\(\),) Tj
+T*
+(    \),) Tj
+T*
+(  \),) Tj
+T*
+(\)..getTask\(\)) Tj
+T*
+() Tj
+T*
+( Bu yondashuvning ma'nosi shuki, UI API bilan to'g'ridan-to'g'ri gaplashmaydi. UI faqat) Tj
+T*
+(Cubit bilan ishlaydi, qolgan qatlamlar pastga qarab uzatiladi.) Tj
+T*
+() Tj
+T*
+(3.2. Cubit state boshqaradi) Tj
+T*
+() Tj
+T*
+( TasksCubit ichida getTask\(\) ishlaganda avval state loading bo'ladi, keyin usecase) Tj
+T*
+(chaqiriladi. Natija muvaffaqiyatli bo'lsa success, xato bo'lsa error holatiga o'tadi.) Tj
+T*
+() Tj
+T*
+(emit\(state.copyWith\(status: TaskStatus.loading\)\);) Tj
+T*
+(final result = await usecase.call\(NoParams\(\)\);) Tj
+T*
+() Tj
+T*
+(if \(result.isRight\) {) Tj
+T*
+(  emit\(state.copyWith\(status: TaskStatus.success, data: result.right\)\);) Tj
+T*
+(} else {) Tj
+T*
+(  emit\(state.copyWith\() Tj
+T*
+(    status: TaskStatus.error,) Tj
+T*
+(    errorText: result.left.message,) Tj
+T*
+(  \)\);) Tj
+T*
+(}) Tj
+T*
+() Tj
+T*
+( Hozirgi kodda foydalanuvchi loading holatini ko'rishi uchun sun'iy ravishda) Tj
+T*
+(Future.delayed\(Duration\(seconds: 3\)\) ham qo'shilgan.) Tj
+T*
+() Tj
+T*
+(3.3. UseCase biznes kirish nuqtasi bo'ladi) Tj
+T*
+() Tj
+T*
+( GetTaskUsecase domain qatlamida turadi va presentation qatlamini repository kontrakti) Tj
+T*
+(bilan bog'laydi. U API qanday ishlashini bilmaydi, faqat taskRepository.getTasks\(\) ni) Tj
+T*
+(chaqiradi.) Tj
+T*
+() Tj
+T*
+(3.4. Repository abstraksiya beradi) Tj
+T*
+() Tj
+T*
+( TaskRepository domain kontrakt hisoblanadi. Bu qatlamning foydasi shundaki, Cubit yoki) Tj
+T*
+(usecase API'ga bog'lanib qolmaydi. Ertaga API o'rniga local cache ishlatilsa ham,) Tj
+T*
+(interfeys bir xil qoladi.) Tj
+T*
+() Tj
+T*
+(abstract class TaskRepository {) Tj
+T*
+(  Future<Either<Failure, List>> getTasks\(\);) Tj
+T*
+(}) Tj
+T*
+() Tj
+T*
+(3.5. Repository implementation real manbaga ulanadi) Tj
+T*
+() Tj
+T*
+( TaskRepositoryImple data qatlamida joylashgan. U datasourcedan natijani olib, yuqori) Tj
+T*
+(qatlamga qaytaradi. Hozircha bu qatlam juda yupqa, lekin aynan shu joyda kerak bo'lsa:) Tj
+T*
+() Tj
+T*
+(- mapping qilish,) Tj
+T*
+(- cache va remote orasida tanlash,) Tj
+T*
+(- bir nechta manbani birlashtirish,) Tj
+T*
+ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 13 0 R >> >> /Contents 8 0 R >>
+endobj
+8 0 obj
+<< /Length 1904 >>
+stream
+BT
+/F1 11 Tf
+14 TL
+50 795 Td
+(- response ni domain modelga o'tkazish) Tj
+T*
+() Tj
+T*
+(bajarilishi mumkin.) Tj
+T*
+() Tj
+T*
+(3.6. DataSource API bilan bevosita gaplashadi) Tj
+T*
+() Tj
+T*
+( API ga haqiqiy so'rov aynan TaskRemoteDataSourceImpl ichida yuboriladi:) Tj
+T*
+() Tj
+T*
+(final response = await Dio\(\).get\("http://localhost:1337/api/tasks"\);) Tj
+T*
+() Tj
+T*
+(Bu yerda oqim quyidagicha:) Tj
+T*
+() Tj
+T*
+(- Dio HTTP so'rov yuboradi.) Tj
+T*
+(- Agar status kodi 200-299 oralig'ida bo'lsa, response.data['data'] olinadi.) Tj
+T*
+(- Muvaffaqiyat bo'lsa Right\(...\) qaytariladi.) Tj
+T*
+(- Xato bo'lsa Left\(Failure\) qaytariladi.) Tj
+T*
+() Tj
+T*
+(4. Nega Either ishlatilgan) Tj
+T*
+() Tj
+T*
+( Loyihada natija Either<Failure, Data> orqali qaytariladi:) Tj
+T*
+() Tj
+T*
+(- Right = muvaffaqiyatli natija) Tj
+T*
+(- Left = xatolik) Tj
+T*
+() Tj
+T*
+( Bu usulning foydasi shuki, metod doimo bitta tipdagi natija qaytaradi va yuqori) Tj
+T*
+(qatlamlar try/catch bilan to'lib ketmaydi.) Tj
+T*
+() Tj
+T*
+(if \(result.isRight\) {) Tj
+T*
+(  // success data) Tj
+T*
+(} else {) Tj
+T*
+(  // failure message) Tj
+T*
+(}) Tj
+T*
+() Tj
+T*
+(5. Xatoliklar qanday ushlanadi) Tj
+T*
+() Tj
+T*
+(TaskRemoteDataSourceImpl ichida uch xil asosiy holat bor:) Tj
+T*
+() Tj
+T*
+(- DioException: server yoki request muammosi.) Tj
+T*
+(- SocketException: internet yo'q yoki tarmoq uzilgan.) Tj
+T*
+(- catch: kutilmagan umumiy xatolik.) Tj
+T*
+() Tj
+T*
+(} on DioException catch \(error\) {) Tj
+T*
+(  return Left\(DioFailure\(message: error.message\)\);) Tj
+T*
+(} on SocketException catch \(_\) {) Tj
+T*
+(  return Left\(NetworkFailure\(message: "Internet o'chiq"\)\);) Tj
+T*
+(} catch \(error\) {) Tj
+T*
+(  return Left\(Failure\(message: 'Something went wrong'\)\);) Tj
+T*
+(}) Tj
+T*
+() Tj
+T*
+( Keyin bu xatolik Cubit ga chiqadi va u errorText orqali UI ga uzatiladi.) Tj
+T*
+() Tj
+T*
+(6. Hozirgi loyihadagi API oqimining kuchli tomonlari) Tj
+T*
+() Tj
+T*
+ET
+endstream
+endobj
+9 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 13 0 R >> >> /Contents 10 0 R >>
+endobj
+10 0 obj
+<< /Length 2552 >>
+stream
+BT
+/F1 11 Tf
+14 TL
+50 795 Td
+(- UI qatlam API detallarini bilmaydi.) Tj
+T*
+(- Biznes qoidalar usecase orqali ajratilgan.) Tj
+T*
+(- Xatoliklar yagona formatda qaytadi.) Tj
+T*
+(- Test yozish osonlashadi, chunki repository kontrakti bor.) Tj
+T*
+() Tj
+T*
+(7. Muhim kuzatuvlar) Tj
+T*
+() Tj
+T*
+( Hozir dependency injection alohida container yoki service locator orqali emas,) Tj
+T*
+(to'g'ridan-to'g'ri TasksPage ichida qurilgan. Kichik loyiha uchun bu ishlaydi, lekin) Tj
+T*
+(loyiha kattalashsa get_it, injectable yoki alohida composition root kerak bo'lishi) Tj
+T*
+(mumkin.) Tj
+T*
+() Tj
+T*
+(- Datasource hozir List qaytaryapti, ya'ni tiplar hali kuchli emas.) Tj
+T*
+(- task_model.dart amaliy oqimda hali ishlatilmayapti.) Tj
+T*
+(- Repository qatlamida mapping deyarli yo'q, natija xom holda yuqoriga chiqyapti.) Tj
+T*
+(- API URL hardcoded: http://localhost:1337/api/tasks.) Tj
+T*
+() Tj
+T*
+(8. Yangi API qo'shmoqchi bo'lsak tartib qanday bo'ladi) Tj
+T*
+() Tj
+T*
+(Masalan, yangi POST /api/tasks qo'shish uchun odatda quyidagi tartib bo'ladi:) Tj
+T*
+() Tj
+T*
+(- Datasource ichida addTask\(...\) yoziladi va Dio orqali POST yuboriladi.) Tj
+T*
+(- Repository kontraktiga addTask metodi qo'shiladi.) Tj
+T*
+(- Repository implementation datasourcedagi yangi metodni chaqiradi.) Tj
+T*
+(- Domain qatlamida AddTaskUsecase yoziladi.) Tj
+T*
+(- Cubit ichida yangi action ochiladi.) Tj
+T*
+(- UI shu actionni chaqiradi.) Tj
+T*
+() Tj
+T*
+(UI -> Cubit.addTask\(\) -> AddTaskUsecase -> TaskRepository.addTask\(\) ->) Tj
+T*
+(TaskRemoteDataSource.addTask\(\) -> Dio\(\).post\(...\) -> API) Tj
+T*
+() Tj
+T*
+(9. Qisqa misol: GET so'rov boshidan oxirigacha) Tj
+T*
+() Tj
+T*
+(- Foydalanuvchi TasksPage ga kiradi.) Tj
+T*
+(- BlocProvider ichida TasksCubit yaratiladi.) Tj
+T*
+(- ..getTask\(\) ishga tushadi.) Tj
+T*
+(- Cubit state ni loading ga o'tkazadi.) Tj
+T*
+(- Cubit GetTaskUsecase ni chaqiradi.) Tj
+T*
+(- Usecase TaskRepository ga murojaat qiladi.) Tj
+T*
+(- Repository TaskRemoteDataSourceImpl ni chaqiradi.) Tj
+T*
+(- Datasource Dio orqali GET /api/tasks yuboradi.) Tj
+T*
+(- Serverdan javob keladi.) Tj
+T*
+(- Natija Right\(data\) yoki Left\(failure\) ko'rinishida qaytadi.) Tj
+T*
+(- Cubit yangi state beradi.) Tj
+T*
+(- UI state ga qarab ro'yxat yoki xatolikni ko'rsatadi.) Tj
+T*
+() Tj
+T*
+(10. Koddagi tayanch nuqtalar) Tj
+T*
+() Tj
+T*
+(- TasksPage: dependency zanjiri va birinchi chaqiriq.) Tj
+T*
+(- TasksCubit: state boshqaruvi.) Tj
+T*
+(- GetTaskUsecase: biznes kirish nuqtasi.) Tj
+T*
+(- TaskRepository: kontrakt.) Tj
+T*
+(- TaskRepositoryImple: repository implementatsiyasi.) Tj
+T*
+ET
+endstream
+endobj
+11 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 13 0 R >> >> /Contents 12 0 R >>
+endobj
+12 0 obj
+<< /Length 1544 >>
+stream
+BT
+/F1 11 Tf
+14 TL
+50 795 Td
+(- TaskRemoteDataSourceImpl: real HTTP so'rov joyi.) Tj
+T*
+(- Either va Failure: success/error formatlari.) Tj
+T*
+() Tj
+T*
+(11. Xulosa) Tj
+T*
+() Tj
+T*
+( Bu loyihadagi TTD arxitektura yondashuvi API chaqiriqlarini qatlamlarga ajratib) Tj
+T*
+(boshqaradi. Natijada UI soddalashadi, biznes mantiq ajraladi va data manbasini) Tj
+T*
+(almashtirish osonlashadi. Hozirgi implementatsiya sodda va tushunarli, ayniqsa birinchi) Tj
+T*
+(clean architecture tajribasi uchun yaxshi asos bo'la oladi. Keyingi bosqichda typed) Tj
+T*
+(model, dependency injection va request konfiguratsiyasini markazlashtirish qo'shilsa) Tj
+T*
+(arxitektura ancha mustahkam bo'ladi.) Tj
+T*
+() Tj
+T*
+(12. Manba fayllar) Tj
+T*
+() Tj
+T*
+(- lib/features/tasks/presentation/pages/tasks_page.dart \(17-21: dependency zanjiri va) Tj
+T*
+(getTask start\)) Tj
+T*
+(- lib/features/tasks/presentation/cubit/tasks_cubit.dart \(15-24: state va usecase oqimi\)) Tj
+T*
+(- lib/features/tasks/domain/usecases/get_task_usecase.dart \(8-15: usecase delegatsiyasi\)) Tj
+T*
+(- lib/features/tasks/domain/repositories/task_repository.dart \(4-5: repository) Tj
+T*
+(kontrakti\)) Tj
+T*
+(- lib/features/tasks/data/repositories/task_repository_impl.dart \(12-18: repository) Tj
+T*
+(implementatsiyasi\)) Tj
+T*
+(- lib/features/tasks/data/datasources/task_remote_data_source.dart \(14-33: Dio so'rovi) Tj
+T*
+(va error handling\)) Tj
+T*
+(- lib/core/error/failures.dart \(3-21: failure turlari\)) Tj
+T*
+(- lib/core/utils/either.dart \(9-60: Left/Right natija modeli\)) Tj
+T*
+() Tj
+T*
+ET
+endstream
+endobj
+13 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 14
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000142 00000 n 
+0000000269 00000 n 
+0000003336 00000 n 
+0000003463 00000 n 
+0000005757 00000 n 
+0000005884 00000 n 
+0000007840 00000 n 
+0000007968 00000 n 
+0000010573 00000 n 
+0000010702 00000 n 
+0000012299 00000 n 
+trailer
+<< /Size 14 /Root 1 0 R >>
+startxref
+12370
+%%EOF

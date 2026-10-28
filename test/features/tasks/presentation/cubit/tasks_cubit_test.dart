@@ -4,8 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:task_app/core/error/failures.dart';
 import 'package:task_app/core/usecases/usecase.dart';
-import 'package:task_app/features/tasks/presentation/cubit/tasks_cubit.dart';
-import 'package:task_app/features/tasks/presentation/cubit/tasks_state.dart';
+import 'package:task_app/features/tasks/presentation/bloc/tasks_cubit.dart';
+import 'package:task_app/features/tasks/presentation/bloc/tasks_state.dart';
 
 import '../../../../helpers/mocks.dart';
 import '../../../../helpers/task_fixtures.dart';

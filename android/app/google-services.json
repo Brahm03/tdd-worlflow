@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1066860988064",
+    "project_id": "taskro-bcd6b",
+    "storage_bucket": "taskro-bcd6b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1066860988064:android:41995e2175e44235b4abc5",
+        "android_client_info": {
+          "package_name": "com.example.task_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDe1GyBfaLQtpcYEi9VlY5Mkk-E_KeN1_8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

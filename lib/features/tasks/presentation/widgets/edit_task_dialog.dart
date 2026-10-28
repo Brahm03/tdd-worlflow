@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../cubit/tasks_cubit.dart';
+import '../bloc/tasks_cubit.dart';
 
 const priorities = ['low', 'medium', 'high'];
 

@@ -5,7 +5,7 @@ import 'package:task_app/core/consts/colors/app_colors.dart';
 import 'package:task_app/core/usecases/usecase.dart';
 import 'package:task_app/features/tasks/domain/usecases/edit_task_usecase.dart';
 import 'package:task_app/features/tasks/domain/usecases/get_task_usecase.dart';
-import 'package:task_app/features/tasks/presentation/cubit/tasks_state.dart';
+import 'package:task_app/features/tasks/presentation/bloc/tasks_state.dart';
 
 class TasksCubit extends Cubit<TasksState> {
   final GetTaskUsecase usecase;

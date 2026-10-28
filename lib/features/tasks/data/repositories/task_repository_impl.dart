@@ -28,4 +28,14 @@ class TaskRepositoryImple extends TaskRepository {
       return Left(result.left);
     }
   }
+
+  @override
+  Future<Either<Failure, List>> getAds() async {
+    final result = await dataSource.getAds();
+    if (result.isRight) {
+      return Right(result.right);
+    } else {
+      return Left(result.left);
+    }
+  }
 }

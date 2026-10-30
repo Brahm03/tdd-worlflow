@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:task_app/core/router/app_router.dart';
-import 'package:task_app/features/auth/auth_injection.dart';
+import 'package:task_app/core/di/injection.dart';
 import 'package:task_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:task_app/features/auth/presentation/bloc/auth_event.dart';
 import 'package:task_app/features/auth/presentation/bloc/auth_state.dart';
@@ -15,7 +15,7 @@ class LogoutButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => createAuthBloc(),
+      create: (context) => getIt<AuthBloc>(),
       child: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state.status == AuthStatus.loggedOut) {

@@ -9,6 +9,7 @@ class AuthInterceptor extends Interceptor {
   AuthInterceptor(this._dio);
 
   final Dio _dio;
+  
 
   Future<String?>? _refreshing;
   DateTime? _lastRefreshAt;

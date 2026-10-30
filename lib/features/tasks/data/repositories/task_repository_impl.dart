@@ -1,8 +1,11 @@
+import 'package:injectable/injectable.dart';
 import 'package:task_app/core/error/failures.dart';
 import 'package:task_app/core/utils/either.dart';
 import 'package:task_app/features/tasks/data/datasources/task_remote_data_source.dart';
 import 'package:task_app/features/tasks/domain/repositories/task_repository.dart';
 
+
+@LazySingleton(as: TaskRepository)
 class TaskRepositoryImple extends TaskRepository {
   final TaskDataSource dataSource;
 

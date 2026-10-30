@@ -16,7 +16,6 @@ class AppRoutes {
 
 GoRouter appRouter = GoRouter(
     initialLocation: AppRoutes.instance.home,
-    // * token yo'q bo'lsa login'ga, bor bo'lsa auth sahifalaridan home'ga
     redirect: (context, state) {
       final loggedIn = TokenStorage.instance.isLoggedIn;
       final onAuthPage = state.matchedLocation == AppRoutes.instance.login ||

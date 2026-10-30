@@ -1,9 +1,12 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:injectable/injectable.dart';
 import 'package:task_app/core/usecases/usecase.dart';
 import 'package:task_app/features/tasks/domain/usecases/get_ads_usecase.dart';
 import 'package:task_app/features/tasks/presentation/bloc/ads/ad_event.dart';
 import 'package:task_app/features/tasks/presentation/bloc/ads/ad_state.dart';
 
+
+@injectable
 class AdBloc extends Bloc<AdEvent, AdState> {
   final GetAdsUsecase getAdsUsecase;
 

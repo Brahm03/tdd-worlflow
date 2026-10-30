@@ -1,19 +1,19 @@
-import 'package:dartz/dartz.dart' hide Task;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:task_app/core/usecases/usecase.dart';
-import 'package:task_app/features/tasks/domain/usecases/get_tasks.dart';
+import 'package:task_app/core/utils/either.dart';
+import 'package:task_app/features/tasks/domain/usecases/get_task_usecase.dart';
 
 import '../../../../helpers/mocks.dart';
 import '../../../../helpers/task_fixtures.dart';
 
 void main() {
-  late GetTasks usecase;
+  late GetTaskUsecase usecase;
   late MockTaskRepository mockRepository;
 
   setUp(() {
     mockRepository = MockTaskRepository();
-    usecase = GetTasks(mockRepository);
+    usecase = GetTaskUsecase(taskRepository: mockRepository);
   });
 
   test('should get tasks from the repository', () async {
@@ -21,7 +21,7 @@ void main() {
 
     final result = await usecase(NoParams());
 
-    expect(result, Right(tTasks));
+    expect(result.right, tTasks);
     verify(() => mockRepository.getTasks()).called(1);
     verifyNoMoreInteractions(mockRepository);
   });

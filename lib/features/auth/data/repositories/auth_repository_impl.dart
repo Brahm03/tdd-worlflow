@@ -1,3 +1,4 @@
+import 'package:injectable/injectable.dart';
 import 'package:task_app/core/error/failures.dart';
 import 'package:task_app/core/storage/token_storage.dart';
 import 'package:task_app/core/utils/either.dart';
@@ -6,12 +7,14 @@ import 'package:task_app/features/auth/data/models/auth_user_model.dart';
 import 'package:task_app/features/auth/domain/entities/auth_user.dart';
 import 'package:task_app/features/auth/domain/repositories/auth_repository.dart';
 
+
+
+@LazySingleton(as: AuthRepository)
 class AuthRepositoryImpl extends AuthRepository {
   final AuthDataSource dataSource;
   final TokenStorage storage;
 
-  AuthRepositoryImpl({required this.dataSource, TokenStorage? storage})
-      : storage = storage ?? TokenStorage.instance;
+  AuthRepositoryImpl({required this.dataSource, required this.storage});
 
   @override
   Future<Either<Failure, AuthUser>> login({

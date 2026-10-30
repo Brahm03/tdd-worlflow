@@ -1,8 +1,8 @@
 import "dart:io";
 
 import "package:dio/dio.dart";
+import "package:injectable/injectable.dart";
 import "package:task_app/core/error/failures.dart";
-import "package:task_app/core/utils/dio_model.dart";
 import "package:task_app/core/utils/either.dart";
 import "package:task_app/features/auth/data/models/auth_user_model.dart";
 
@@ -18,32 +18,35 @@ abstract class AuthDataSource {
   });
 }
 
+@LazySingleton(as: AuthDataSource)
 class AuthRemoteDataSourceImpl extends AuthDataSource {
-  final DioModule client;
+  final Dio client;
 
-  AuthRemoteDataSourceImpl({DioModule? client})
-      : client = client ?? DioModule();
+  AuthRemoteDataSourceImpl({required this.client});
 
   @override
   Future<Either<Failure, AuthUserModel>> login({
     required String identifier,
     required String password,
-  }) =>
-      _post('auth/local', {"identifier": identifier, "password": password});
+  }) => _post('auth/local', {"identifier": identifier, "password": password});
 
   @override
   Future<Either<Failure, AuthUserModel>> register({
     required String username,
     required String email,
     required String password,
-  }) =>
-      _post('auth/local/register',
-          {"username": username, "email": email, "password": password});
+  }) => _post('auth/local/register', {
+    "username": username,
+    "email": email,
+    "password": password,
+  });
 
   Future<Either<Failure, AuthUserModel>> _post(
-      String url, Map<String, dynamic> body) async {
+    String url,
+    Map<String, dynamic> body,
+  ) async {
     try {
-      final response = await client.dio().post(url, data: body);
+      final response = await client.post(url, data: body);
       if (response.statusCode != null &&
           response.statusCode! >= 200 &&
           response.statusCode! < 300) {
@@ -69,4 +72,8 @@ class AuthRemoteDataSourceImpl extends AuthDataSource {
       return Left(Failure(message: 'Something went wrong'));
     }
   }
+}
+
+abstract class UseDataSource {
+  Future<Either<Failure, Map>> getUse();
 }

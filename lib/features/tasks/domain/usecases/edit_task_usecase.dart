@@ -1,8 +1,11 @@
+import 'package:injectable/injectable.dart';
 import 'package:task_app/core/error/failures.dart';
 import 'package:task_app/core/usecases/usecase.dart';
 import 'package:task_app/core/utils/either.dart';
 import 'package:task_app/features/tasks/domain/repositories/task_repository.dart';
 
+
+@injectable
 class EditTaskUsecase extends UseCase<void, EditTaskParams> {
   final TaskRepository repository;
 

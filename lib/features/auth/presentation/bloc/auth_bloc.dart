@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:injectable/injectable.dart';
 import 'package:task_app/core/error/failures.dart';
 import 'package:task_app/core/usecases/usecase.dart';
 import 'package:task_app/core/utils/either.dart';
@@ -10,6 +11,7 @@ import 'package:task_app/features/auth/domain/usecases/register_usecase.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
 
+@injectable
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LoginUsecase loginUsecase;
   final RegisterUsecase registerUsecase;
@@ -27,21 +29,24 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> _onLogin(LoginSubmitted event, Emitter<AuthState> emit) async {
     emit(state.copyWith(status: AuthStatus.loading));
-    final result = await loginUsecase.call(LoginParams(
-      identifier: event.identifier,
-      password: event.password,
-    ));
+    final result = await loginUsecase.call(
+      LoginParams(identifier: event.identifier, password: event.password),
+    );
     _emitResult(result, emit);
   }
 
   Future<void> _onRegister(
-      RegisterSubmitted event, Emitter<AuthState> emit) async {
+    RegisterSubmitted event,
+    Emitter<AuthState> emit,
+  ) async {
     emit(state.copyWith(status: AuthStatus.loading));
-    final result = await registerUsecase.call(RegisterParams(
-      username: event.username,
-      email: event.email,
-      password: event.password,
-    ));
+    final result = await registerUsecase.call(
+      RegisterParams(
+        username: event.username,
+        email: event.email,
+        password: event.password,
+      ),
+    );
     _emitResult(result, emit);
   }
 
@@ -54,9 +59,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     if (result.isRight) {
       emit(state.copyWith(status: AuthStatus.success, user: result.right));
     } else {
-      emit(state.copyWith(
+      emit(
+        state.copyWith(
           status: AuthStatus.failure,
-          errorText: result.left.message ?? 'Something went wrong'));
+          errorText: result.left.message ?? 'Something went wrong',
+        ),
+      );
     }
   }
 }

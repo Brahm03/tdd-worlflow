@@ -1,170 +1,79 @@
-import 'package:dartz/dartz.dart' hide Task;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:task_app/core/error/exceptions.dart';
 import 'package:task_app/core/error/failures.dart';
+import 'package:task_app/core/utils/either.dart';
 import 'package:task_app/features/tasks/data/repositories/task_repository_impl.dart';
 
 import '../../../../helpers/mocks.dart';
 import '../../../../helpers/task_fixtures.dart';
 
 void main() {
-  late TaskRepositoryImpl repository;
-  late MockTaskRemoteDataSource mockRemoteDataSource;
-  late MockNetworkInfo mockNetworkInfo;
+  late TaskRepositoryImple repository;
+  late MockTaskDataSource mockDataSource;
 
   setUp(() {
-    mockRemoteDataSource = MockTaskRemoteDataSource();
-    mockNetworkInfo = MockNetworkInfo();
-    repository = TaskRepositoryImpl(
-      remoteDataSource: mockRemoteDataSource,
-      networkInfo: mockNetworkInfo,
-    );
+    mockDataSource = MockTaskDataSource();
+    repository = TaskRepositoryImple(dataSource: mockDataSource);
   });
-
-  void online() =>
-      when(() => mockNetworkInfo.isConnected).thenAnswer((_) async => true);
-  void offline() =>
-      when(() => mockNetworkInfo.isConnected).thenAnswer((_) async => false);
 
   group('getTasks', () {
-    test('returns Right(tasks) when online and call succeeds', () async {
-      online();
-      when(() => mockRemoteDataSource.getTasks())
-          .thenAnswer((_) async => tTaskModels);
+    test('returns Right(tasks) when data source succeeds', () async {
+      when(() => mockDataSource.getTasks())
+          .thenAnswer((_) async => Right(tTasks));
 
       final result = await repository.getTasks();
 
-      expect(result, Right(tTaskModels));
+      expect(result.right, tTasks);
     });
 
-    test('returns Left(ServerFailure) when call throws ServerException',
-        () async {
-      online();
-      when(() => mockRemoteDataSource.getTasks()).thenThrow(ServerException());
+    test('returns Left(failure) when data source fails', () async {
+      when(() => mockDataSource.getTasks()).thenAnswer(
+          (_) async => Left(const NetworkFailure(message: "Internet o'chiq")));
 
       final result = await repository.getTasks();
 
-      expect(result, Left(ServerFailure()));
-    });
-
-    test('returns Left(NetworkFailure) when offline', () async {
-      offline();
-
-      final result = await repository.getTasks();
-
-      expect(result, Left(NetworkFailure()));
-      verifyZeroInteractions(mockRemoteDataSource);
-    });
-  });
-
-  group('addTask', () {
-    test('returns Right(task) when online and call succeeds', () async {
-      online();
-      when(() => mockRemoteDataSource.addTask(
-            title: tTask.title,
-            description: tTask.description,
-          )).thenAnswer((_) async => tTaskModel);
-
-      final result = await repository.addTask(
-        title: tTask.title,
-        description: tTask.description,
-      );
-
-      expect(result, Right(tTaskModel));
-    });
-
-    test('returns Left(ServerFailure) when call throws ServerException',
-        () async {
-      online();
-      when(() => mockRemoteDataSource.addTask(
-            title: any(named: 'title'),
-            description: any(named: 'description'),
-          )).thenThrow(ServerException());
-
-      final result = await repository.addTask(
-        title: tTask.title,
-        description: tTask.description,
-      );
-
-      expect(result, Left(ServerFailure()));
-    });
-
-    test('returns Left(NetworkFailure) when offline', () async {
-      offline();
-
-      final result = await repository.addTask(
-        title: tTask.title,
-        description: tTask.description,
-      );
-
-      expect(result, Left(NetworkFailure()));
-      verifyZeroInteractions(mockRemoteDataSource);
+      expect(result.left, const NetworkFailure(message: "Internet o'chiq"));
     });
   });
 
   group('updateTask', () {
-    setUpAll(() => registerFallbackValue(tTaskModel));
+    test('returns Right when data source succeeds', () async {
+      when(() => mockDataSource.updateTask('abc123', {'isDone': true}))
+          .thenAnswer((_) async => Right(null));
 
-    test('returns Right(task) when online and call succeeds', () async {
-      online();
-      when(() => mockRemoteDataSource.updateTask(any()))
-          .thenAnswer((_) async => tTaskModel);
+      final result = await repository.updateTask('abc123', {'isDone': true});
 
-      final result = await repository.updateTask(tTask);
-
-      expect(result, Right(tTaskModel));
+      expect(result.isRight, true);
+      verify(() => mockDataSource.updateTask('abc123', {'isDone': true}))
+          .called(1);
     });
 
-    test('returns Left(ServerFailure) when call throws ServerException',
-        () async {
-      online();
-      when(() => mockRemoteDataSource.updateTask(any()))
-          .thenThrow(ServerException());
+    test('returns Left(failure) when data source fails', () async {
+      when(() => mockDataSource.updateTask(any(), any())).thenAnswer(
+          (_) async => Left(const DioFailure(message: 'Server ishlamayapti')));
 
-      final result = await repository.updateTask(tTask);
+      final result = await repository.updateTask('abc123', {'isDone': true});
 
-      expect(result, Left(ServerFailure()));
-    });
-
-    test('returns Left(NetworkFailure) when offline', () async {
-      offline();
-
-      final result = await repository.updateTask(tTask);
-
-      expect(result, Left(NetworkFailure()));
-      verifyZeroInteractions(mockRemoteDataSource);
+      expect(result.left, const DioFailure(message: 'Server ishlamayapti'));
     });
   });
 
-  group('deleteTask', () {
-    test('returns Right(unit) when online and call succeeds', () async {
-      online();
-      when(() => mockRemoteDataSource.deleteTask('1')).thenAnswer((_) async {});
+  group('getAds', () {
+    test('returns Right(ads) when data source succeeds', () async {
+      when(() => mockDataSource.getAds()).thenAnswer((_) async => Right([]));
 
-      final result = await repository.deleteTask('1');
+      final result = await repository.getAds();
 
-      expect(result, const Right(unit));
+      expect(result.right, []);
     });
 
-    test('returns Left(ServerFailure) when call throws ServerException',
-        () async {
-      online();
-      when(() => mockRemoteDataSource.deleteTask('1'))
-          .thenThrow(ServerException());
+    test('returns Left(failure) when data source fails', () async {
+      when(() => mockDataSource.getAds())
+          .thenAnswer((_) async => Left(const Failure(message: 'error')));
 
-      final result = await repository.deleteTask('1');
+      final result = await repository.getAds();
 
-      expect(result, Left(ServerFailure()));
-    });
-
-    test('returns Left(NetworkFailure) when offline', () async {
-      offline();
-
-      final result = await repository.deleteTask('1');
-
-      expect(result, Left(NetworkFailure()));
-      verifyZeroInteractions(mockRemoteDataSource);
+      expect(result.left, const Failure(message: 'error'));
     });
   });
 }

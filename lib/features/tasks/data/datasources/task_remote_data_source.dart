@@ -2,9 +2,9 @@ import "dart:async";
 import "dart:io";
 
 import "package:dio/dio.dart";
+import "package:injectable/injectable.dart";
 import "package:task_app/core/error/failures.dart";
 import "package:task_app/core/storage/token_storage.dart";
-import "package:task_app/core/utils/dio_model.dart";
 import "package:task_app/core/utils/either.dart";
 
 abstract class TaskDataSource {
@@ -17,15 +17,19 @@ abstract class TaskDataSource {
       String id, Map<String, dynamic> data);
 }
 
+
+@LazySingleton(as: TaskDataSource)
 class TaskRemoteDataSourceImpl extends TaskDataSource {
   // * login/register paytida saqlangan jwt
 
-  DioModule client = DioModule();
+  final Dio client;
+
+  TaskRemoteDataSourceImpl({required this.client});
 
   @override
   Future<Either<Failure, List>> getTasks() async {
     try {
-      final response = await client.dio().get("tasks");
+      final response = await client.get("tasks");
       if (response.statusCode != null &&
           response.statusCode! >= 200 &&
           response.statusCode! < 300) {
@@ -58,7 +62,7 @@ class TaskRemoteDataSourceImpl extends TaskDataSource {
     try {
       print('ID ${'http://localhost:1337/api/tasks/$id'}');
       print("Data $data");
-      final response = await client.dio().put(
+      final response = await client.put(
         'tasks/$id',
         data: {"data": data},
       );
@@ -91,7 +95,7 @@ class TaskRemoteDataSourceImpl extends TaskDataSource {
       }
 
       // * Authorization headerni AuthInterceptor qo'shadi
-      final response = await client.dio().get("reklamas?populate=image");
+      final response = await client.get("reklamas?populate=image");
 
       if (response.statusCode != null &&
           response.statusCode! >= 200 &&

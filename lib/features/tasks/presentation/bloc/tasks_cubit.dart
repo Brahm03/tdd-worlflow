@@ -1,12 +1,14 @@
 import 'dart:ui';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:injectable/injectable.dart';
 import 'package:task_app/core/consts/colors/app_colors.dart';
 import 'package:task_app/core/usecases/usecase.dart';
 import 'package:task_app/features/tasks/domain/usecases/edit_task_usecase.dart';
 import 'package:task_app/features/tasks/domain/usecases/get_task_usecase.dart';
 import 'package:task_app/features/tasks/presentation/bloc/tasks_state.dart';
 
+@injectable
 class TasksCubit extends Cubit<TasksState> {
   final GetTaskUsecase usecase;
   final EditTaskUsecase editTaskUsecase;

@@ -2,13 +2,15 @@ import 'dart:developer' as dev;
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:injectable/injectable.dart';
 import 'package:task_app/core/utils/auth_interceptor.dart';
 
-class DioModule {
+@module
+abstract class DioModule {
   // * Bitta umumiy Dio — aks holda har so'rovda yangi AuthInterceptor yaratilib,
   // * parallel so'rovlar bir vaqtda refresh qiladi va rotation sabab sessiya o'chadi
   static final Dio _instance = _create();
-
+  @lazySingleton
   Dio dio() => _instance;
 
   static Dio _create() {

@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:task_app/core/di/injection.dart';
 import 'package:task_app/features/auth/presentation/widgets/logout_button.dart';
-import 'package:task_app/features/tasks/data/datasources/task_remote_data_source.dart';
-import 'package:task_app/features/tasks/data/repositories/task_repository_impl.dart';
-import 'package:task_app/features/tasks/domain/usecases/edit_task_usecase.dart';
-import 'package:task_app/features/tasks/domain/usecases/get_ads_usecase.dart';
-import 'package:task_app/features/tasks/domain/usecases/get_task_usecase.dart';
 import 'package:task_app/features/tasks/presentation/bloc/ads/ad_bloc.dart';
 import 'package:task_app/features/tasks/presentation/bloc/ads/ad_event.dart';
 import 'package:task_app/features/tasks/presentation/bloc/tasks_cubit.dart';
@@ -22,18 +18,9 @@ class TasksPage extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-            create: (context) => AdBloc(GetAdsUsecase(
-                taskRepository: TaskRepositoryImple(
-                    dataSource: TaskRemoteDataSourceImpl())))..add(GetAdsEvent())),
+            create: (context) => getIt<AdBloc>()),
         BlocProvider(
-            create: (context) => TasksCubit(
-                editTaskUsecase: EditTaskUsecase(
-                    repository: TaskRepositoryImple(
-                        dataSource: TaskRemoteDataSourceImpl())),
-                usecase: GetTaskUsecase(
-                    taskRepository: TaskRepositoryImple(
-                        dataSource: TaskRemoteDataSourceImpl())))
-              ..getTask())
+            create: (context) => getIt<TasksCubit>()..getTask())
       ],
       child: Scaffold(
         extendBodyBehindAppBar: true,
